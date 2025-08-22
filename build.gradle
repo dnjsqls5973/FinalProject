@@ -30,6 +30,10 @@ dependencies {
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 	runtimeOnly 'com.h2database:h2'
 
+	// Open ai api 사용을 위한 의존성 추가
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'  // WebClient
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+
 	// ✅ Lombok 의존성 추가
 	compileOnly 'org.projectlombok:lombok:1.18.32'
 	annotationProcessor 'org.projectlombok:lombok:1.18.32'
