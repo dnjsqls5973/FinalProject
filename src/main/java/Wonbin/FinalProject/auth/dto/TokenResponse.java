@@ -11,9 +11,11 @@ import lombok.Setter;
 public class TokenResponse {
     private String accessToken;
     private String refreshToken;
+    private String response;
 
-    public TokenResponse(String accessToken, String refreshToken) {
+    public TokenResponse(String accessToken, String refreshToken, String response) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
+        this.response = response;
     }
 }

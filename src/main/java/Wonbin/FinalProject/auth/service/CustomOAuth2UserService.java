@@ -15,7 +15,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -40,10 +39,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         AuthProvider provider = AuthProvider.valueOf(registrationId.toUpperCase());
 
         // DB에서 사용자 조회 or 저장
-        User user = userRepository.findByProviderAndProviderId(provider, attr.getProviderId())
+        User user = userRepository.findByProviderAndProviderId(provider.toString(), attr.getProviderId())
                 .orElseGet(() -> userRepository.save(
                         User.builder()
-                                .provider(provider)
+                                .provider(provider.toString())
                                 .providerId(attr.getProviderId())
                                 .email(attr.getEmail())
                                 .name(attr.getName())

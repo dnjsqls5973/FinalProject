@@ -1,9 +1,6 @@
 package Wonbin.FinalProject.config;
 
 import Wonbin.FinalProject.auth.jwt.JwtAuthenticationFilter;
-import Wonbin.FinalProject.auth.jwt.JwtProvider;
-import Wonbin.FinalProject.auth.jwt.OAuth2SuccessHandler;
-import Wonbin.FinalProject.auth.service.CustomOAuth2UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -25,9 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -35,7 +30,7 @@ public class SecurityConfig {
                 // 1) REST API + JWT 이면 보통 전역 CSRF OFF
                 .csrf(csrf -> csrf.disable())
 
-                // 2) 브라우저 호출할 경우 CORS 필요 (CorsConfigurationSource 빈도 함께 등록 권장)
+                // 2) 브라우저 호출할 경우 CORS 필요
                 .cors(Customizer.withDefaults())
 
                 // 3) 세션 미사용 (Stateless)
@@ -46,16 +41,20 @@ public class SecurityConfig {
 
                 // 5) URL 인가 정책
                 .authorizeHttpRequests(auth -> auth
-                        // OAuth2 진입/콜백, 토큰 리프레시 등 공개
-                        .requestMatchers("/", "/login", "/oauth2/**", "/api/token/refresh").permitAll()
+                        // 🔥 인증 관련 API 모두 허용
+                        .requestMatchers("/api/auth/**").permitAll()
+
+                        // OAuth2 진입점들 (혹시 Spring OAuth2도 함께 사용할 경우)
+                        .requestMatchers("/", "/login", "/oauth2/**").permitAll()
+
                         // H2 콘솔(개발)
                         .requestMatchers("/h2-console/**").permitAll()
 
-                        // 👉 공개 API가 있으면 여기에 추가 (예: /chat, /summarize)
+                        // 공개 API
                         .requestMatchers("/chat", "/summarize").permitAll()
 
-                        // Token Test
-                        .requestMatchers("/test.html", "/api/test/public", "/api/test/auth-status","api/auth/**").permitAll()
+                        // 테스트 API
+                        .requestMatchers("/test.html", "/api/test/public", "/api/test/auth-status").permitAll()
 
                         // 나머지는 JWT 필요
                         .anyRequest().authenticated()
@@ -64,44 +63,56 @@ public class SecurityConfig {
                 // 6) JWT 필터 등록 (UsernamePasswordAuthenticationFilter 앞)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 
-                // 7) OAuth2 로그인: 유저정보 조회 + 성공 시 JWT 발급/리다이렉트
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(ui -> ui.userService(customOAuth2UserService))
-                        .successHandler(oAuth2SuccessHandler)
-                )
-
-                // 8) 예외 처리
+                // 7) 예외 처리 - 인증 관련 API는 리다이렉트 하지 않음
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((req, res, e) -> {
                             String uri = req.getRequestURI();
-                            if (uri.startsWith("/oauth2/") || uri.startsWith("/login")) {
-                                res.sendRedirect("/oauth2/authorization/google");
+
+                            // 🔥 API 요청인 경우 JSON 응답
+                            if (uri.startsWith("/api/")) {
+                                res.setContentType("application/json; charset=UTF-8");
+                                res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                res.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"인증이 필요합니다\"}");
                                 return;
                             }
-                            res.setContentType("application/json");
+
+                            // OAuth2 관련 요청인 경우에만 Google 로그인으로 리다이렉트
+                            if (uri.startsWith("/oauth2/") || uri.equals("/login")) {
+                                res.sendRedirect("/api/auth/google/url");
+                                return;
+                            }
+
+                            // 일반 페이지 요청인 경우
+                            res.setContentType("application/json; charset=UTF-8");
                             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            res.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"" + e.getMessage() + "\"}");
+                            res.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"인증이 필요합니다\"}");
                         })
                         .accessDeniedHandler((req, res, e) -> {
-                            res.setContentType("application/json");
+                            res.setContentType("application/json; charset=UTF-8");
                             res.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                            res.getWriter().write("{\"error\":\"Forbidden\",\"message\":\"" + e.getMessage() + "\"}");
+                            res.getWriter().write("{\"error\":\"Forbidden\",\"message\":\"접근 권한이 없습니다\"}");
                         })
                 );
 
         return http.build();
     }
 
-    // 프론트 엔드 연결 시 필요한 CORS
-//    @Bean
-//    CorsConfigurationSource corsConfigurationSource() {
-//        CorsConfiguration config = new CorsConfiguration();
-//        config.setAllowCredentials(true);
-//        config.setAllowedOrigins(List.of("http://localhost:3000", "https://your-domain.com"));
-//        config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
-//        config.setAllowedHeaders(List.of("Authorization","Content-Type","X-Requested-With"));
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", config);
-//        return source;
-//    }
+    // 프론트엔드 연결 시 필요한 CORS 설정
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "http://localhost:8081"
+                // "https://your-domain.com" // 프로덕션 도메인 추가
+        ));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setExposedHeaders(List.of("Authorization", "Content-Type"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
 }
