@@ -1,7 +1,6 @@
 package Wonbin.FinalProject.auth.dto;
 
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

@@ -26,9 +26,9 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final RefreshTokenService refreshTokenService;
     private final Environment environment;
 
-    // application.yml에서 설정 가능
-    @Value("${app.frontend.url:http://localhost:8081}")
-    private String frontendUrl;
+//    // application.yml에서 설정 가능
+//    @Value("${app.frontend.url:http://localhost:8081}")
+//    private String frontendUrl;
 
     @Value("${app.auth.cookie-enabled:true}")
     private boolean cookieEnabled;
