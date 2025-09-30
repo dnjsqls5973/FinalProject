@@ -47,8 +47,8 @@ public class SecurityConfig {
                         // OAuth2 진입점들 (혹시 Spring OAuth2도 함께 사용할 경우)
                         .requestMatchers("/", "/login", "/oauth2/**").permitAll()
 
-                        // H2 콘솔(개발)
-                        .requestMatchers("/h2-console/**").permitAll()
+//                        // H2 콘솔(개발)
+//                        .requestMatchers("/h2-console/**").permitAll()
 
                         // 공개 API
                         .requestMatchers("/chat", "/summarize").permitAll()
@@ -104,7 +104,9 @@ public class SecurityConfig {
         config.setAllowCredentials(true);
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000",
-                "http://localhost:8081"
+                "http://localhost:8081",
+                "http://192.168.0.5:8081",
+                "http://127.0.0.1:8081"
                 // "https://your-domain.com" // 프로덕션 도메인 추가
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));

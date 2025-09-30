@@ -28,11 +28,15 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
-	runtimeOnly 'com.h2database:h2'
+	
+	// ✅ MySQL Driver 추가
+	runtimeOnly 'com.mysql:mysql-connector-j'
+	
+//	// H2 Database (개발/테스트용 - 선택사항)
+//	runtimeOnly 'com.h2database:h2'
 
 	// Open ai api 사용을 위한 의존성 추가
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'  // WebClient
-	implementation 'com.fasterxml.jackson.core:jackson-databind'
 
 	// ✅ Lombok 의존성 추가
 	compileOnly 'org.projectlombok:lombok:1.18.32'

@@ -25,15 +25,13 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:8081"},
-        allowCredentials = "true")
 public class AuthController {
 
     private final JwtProvider jwtProvider;
     private final RefreshTokenService refreshTokenService;
     private final UserService userService;
 
-    @Value("${app.frontend.url:http://localhost:8081}")
+    @Value("${app.frontend.url}")
     private String frontendUrl;
 
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
@@ -91,7 +89,7 @@ public class AuthController {
 
             // 프론트엔드로 리다이렉트
             return ResponseEntity.status(302)
-                    .location(URI.create(frontendUrl + "/pages/home"))
+                    .location(URI.create(frontendUrl + "/auth/socialCallback"/*"/pages/Home"*/))
                     .build();
 
         } catch (Exception e) {
@@ -236,8 +234,6 @@ public class AuthController {
             return ResponseEntity.status(404).build();
         }
     }
-
-
 
     // ===== Helper Methods =====
 

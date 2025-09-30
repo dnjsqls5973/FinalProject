@@ -99,7 +99,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String[] profiles = environment.getActiveProfiles();
 
         if (profiles.length == 0 || "local".equals(profiles[0]) || "dev".equals(profiles[0])) {
-            return "http://localhost:8081";  // 개발 환경
+            return "http://192.168.0.5:8081";  // 개발 환경
         } else if ("staging".equals(profiles[0])) {
             return "https://staging.your-domain.com";  // 스테이징
         } else {
