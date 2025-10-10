@@ -18,6 +18,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,7 +44,7 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> getGoogleLoginUrl() {
         String googleAuthUrl = "https://accounts.google.com/o/oauth2/auth?" +
                 "client_id=" + googleClientId +
-                "&redirect_uri=http://localhost:8080/api/auth/google/callback" +
+                "&redirect_uri=https://unstraddled-frenzily-jerome.ngrok-free.dev/api/auth/google/callback" +
                 "&scope=openid+profile+email" +
                 "&response_type=code" +
                 "&access_type=offline" +
@@ -87,15 +89,25 @@ public class AuthController {
 
             log.info("Google 로그인 성공 - 사용자: {}", user.getEmail());
 
-            // 프론트엔드로 리다이렉트
+
+//            // 프론트엔드로 리다이렉트
+//            return ResponseEntity.status(302)
+//                    .location(URI.create(frontendUrl + "/auth/socialCallback"/*"/pages/Home"*/))
+//                    .build();
+            // 쿠키가 아닌 헤더로 토큰 전달
             return ResponseEntity.status(302)
-                    .location(URI.create(frontendUrl + "/auth/socialCallback"/*"/pages/Home"*/))
+                    .location(URI.create(frontendUrl + "/auth/socialCallback?accessToken=" + accessToken + "&refreshToken=" + refreshToken))
                     .build();
 
         } catch (Exception e) {
             log.error("Google OAuth 콜백 처리 중 오류 발생", e);
+//            return ResponseEntity.status(302)
+//                    .location(URI.create(frontendUrl + "/auth/error?message=" + e.getMessage()))
+//                    .build();
+            // 쿠키가 아닌 헤더로 토큰 전달
             return ResponseEntity.status(302)
-                    .location(URI.create(frontendUrl + "/auth/error?message=" + e.getMessage()))
+                    .location(URI.create(frontendUrl + "/auth/error?message=" +
+                            URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8)))
                     .build();
         }
     }
@@ -274,27 +286,35 @@ public class AuthController {
         // ✅ Access Token 쿠키 (JavaScript에서 접근 가능)
         Cookie accessCookie = new Cookie("accessToken", accessToken);
         accessCookie.setHttpOnly(false);  // JavaScript 접근 가능
-        accessCookie.setSecure(false);    // 개발환경: false, 프로덕션: true
+        accessCookie.setSecure(true);    // 개발환경: false, 프로덕션: true
         accessCookie.setPath("/");
         accessCookie.setMaxAge(60 * 60);  // 1시간
 
         // ✅ Refresh Token 쿠키 (보안 강화)
         Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
         refreshCookie.setHttpOnly(true);   // JavaScript 접근 불가 (보안)
-        refreshCookie.setSecure(false);    // 개발환경: false, 프로덕션: true
+        refreshCookie.setSecure(true);    // 개발환경: false, 프로덕션: true
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 7일
 
         response.addCookie(accessCookie);
         response.addCookie(refreshCookie);
-        
-        // ✅ SameSite 속성 추가 (CSRF 방어)
-        response.setHeader("Set-Cookie", 
-            String.format("accessToken=%s; Path=/; Max-Age=%d; SameSite=Lax", 
-                accessToken, 60 * 60));
-        response.addHeader("Set-Cookie", 
-            String.format("refreshToken=%s; Path=/; Max-Age=%d; HttpOnly; SameSite=Strict", 
-                refreshToken, 7 * 24 * 60 * 60));
+
+        // ⬅️ 변경: SameSite=None 추가 (크로스 도메인 허용)
+        response.setHeader("Set-Cookie",
+                String.format("accessToken=%s; Path=/; Max-Age=%d; Secure; SameSite=None",
+                        accessToken, 60 * 60));
+        response.addHeader("Set-Cookie",
+                String.format("refreshToken=%s; Path=/; Max-Age=%d; HttpOnly; Secure; SameSite=None",
+                        refreshToken, 7 * 24 * 60 * 60));
+
+//        // ✅ SameSite 속성 추가 (CSRF 방어)
+//        response.setHeader("Set-Cookie",
+//            String.format("accessToken=%s; Path=/; Max-Age=%d; SameSite=Lax",
+//                accessToken, 60 * 60));
+//        response.addHeader("Set-Cookie",
+//            String.format("refreshToken=%s; Path=/; Max-Age=%d; HttpOnly; SameSite=Strict",
+//                refreshToken, 7 * 24 * 60 * 60));
     }
 
     private void clearTokenCookies(HttpServletResponse response) {

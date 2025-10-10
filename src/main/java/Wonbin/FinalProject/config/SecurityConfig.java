@@ -96,18 +96,17 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-    // 프론트엔드 연결 시 필요한 CORS 설정
+    // 변경된 사항 Version 1
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "http://localhost:8081",
-                "http://192.168.0.5:8081",
-                "http://127.0.0.1:8081"
-                // "https://your-domain.com" // 프로덕션 도메인 추가
+        config.setAllowedOriginPatterns(List.of(
+                "http://localhost:*",
+                "http://127.0.0.1:*",
+                "http://192.168.*.*:*",
+                "https://*.ngrok-free.dev",
+                "https://*.ngrok-free.app"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
@@ -117,4 +116,26 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
         return source;
     }
+
+    // 프론트엔드 연결 시 필요한 CORS 설정
+//    @Bean
+//    CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration config = new CorsConfiguration();
+//        config.setAllowCredentials(true);
+//        config.setAllowedOrigins(List.of(
+//                "http://localhost:8081",
+//                "http://192.168.0.5:8081",
+//                "http://127.0.0.1:8081",
+//                "https://apomictically-boilerless-birdie.ngrok-free.dev",
+//                "https://unstraddled-frenzily-jerome.ngrok-free.dev"
+//                // "https://your-domain.com" // 프로덕션 도메인 추가
+//        ));
+//        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+//        config.setAllowedHeaders(List.of("*"));
+//        config.setExposedHeaders(List.of("Authorization", "Content-Type"));
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", config);
+//        return source;
+//    }
 }
