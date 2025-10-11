@@ -1,4 +1,4 @@
-package Wonbin.FinalProject.ai.service;
+package Wonbin.FinalProject.ai.common.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;

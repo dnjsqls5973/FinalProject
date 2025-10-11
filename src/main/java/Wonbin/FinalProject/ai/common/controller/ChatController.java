@@ -1,6 +1,6 @@
-package Wonbin.FinalProject.ai.controller;
+package Wonbin.FinalProject.ai.common.controller;
 
-import Wonbin.FinalProject.ai.service.OpenAIService;
+import Wonbin.FinalProject.ai.common.service.OpenAIService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
