@@ -66,4 +66,35 @@ public class OpenAIService {
                     return (String) msg.get("content");
                 });
     }
+
+    /**
+     * 🔥 텍스트를 벡터로 변환 (Embedding)
+     * 텍스트의 의미를 1536개 숫자 배열로 표현
+     */
+    public float[] createEmbedding(String text) {
+        Map<String, Object> body = Map.of(
+                "model", "text-embedding-3-small",  // 가장 저렴한 모델
+                "input", text
+        );
+
+        Map<String, Object> response = webClient.post()
+                .uri("/embeddings")
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
+
+        // 응답에서 벡터 추출
+        List<Map<String, Object>> data = 
+            (List<Map<String, Object>>) response.get("data");
+        List<Double> embedding = 
+            (List<Double>) data.get(0).get("embedding");
+
+        // float 배열로 변환
+        float[] result = new float[embedding.size()];
+        for (int i = 0; i < embedding.size(); i++) {
+            result[i] = embedding.get(i).floatValue();
+        }
+        return result;
+    }
 }

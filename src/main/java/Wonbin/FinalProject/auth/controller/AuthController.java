@@ -7,6 +7,7 @@ import Wonbin.FinalProject.auth.jwt.JwtProvider;
 import Wonbin.FinalProject.auth.service.RefreshTokenService;
 import Wonbin.FinalProject.auth.service.UserService;
 import Wonbin.FinalProject.auth.domain.User;
+import Wonbin.FinalProject.ai.quest.service.QuestService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,6 +33,7 @@ public class AuthController {
     private final JwtProvider jwtProvider;
     private final RefreshTokenService refreshTokenService;
     private final UserService userService;
+    private final QuestService questService;
 
     @Value("${app.frontend.url}")
     private String frontendUrl;
@@ -83,6 +85,10 @@ public class AuthController {
 
             // Refresh Token 저장
             refreshTokenService.save(user.getEmail(), refreshToken);
+
+            // 🔥 비동기로 퀘스트 미리 생성 (백그라운드에서 실행)
+            questService.prepareQuestAsync(user);
+            log.info("🎯 Quest generation started in background for user: {}", user.getEmail());
 
             // 쿠키에 토큰 저장
             addTokenCookies(response, accessToken, refreshToken);
