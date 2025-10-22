@@ -19,7 +19,6 @@ public class QuestResponse {
     private String description;
     private QuestCategory category;
     private LocalDate questDate;
-    private QuestStatus status;
     private String youtubeUrl;
     
     public static QuestResponse from(Quest quest, UserQuest userQuest) {
@@ -29,7 +28,6 @@ public class QuestResponse {
                 .description(quest.getDescription())
                 .category(quest.getCategory())
                 .questDate(quest.getQuestDate())
-                .status(userQuest.getStatus())
                 .youtubeUrl(quest.getYoutubeUrl())
                 .build();
     }
