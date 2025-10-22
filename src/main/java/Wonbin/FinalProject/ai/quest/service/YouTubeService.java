@@ -36,7 +36,7 @@ public class YouTubeService {
                             .queryParam("key", apiKey)
                             .queryParam("regionCode", "KR")
                             .queryParam("relevanceLanguage", "ko")
-                            .queryParam("videoDuration", "short")
+                            .queryParam("videoDuration", "medium")
                             .build())
                     .retrieve()
                     .bodyToMono(Map.class)
