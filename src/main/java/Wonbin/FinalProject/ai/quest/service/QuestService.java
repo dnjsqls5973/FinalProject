@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -92,6 +93,14 @@ public class QuestService {
      */
     private Quest generateAndSaveQuest(User user, LocalDate date) {
         log.info("📝 Generating new quest for user {} on date: {}", user.getEmail(), date);
+
+        // 🔥 먼저 해당 날짜에 퀘스트가 이미 있는지 확인
+        Optional<Quest> existingQuest = questRepository.findByUserAndQuestDate(user, date);
+        if (existingQuest.isPresent()) {
+            log.warn("⚠️ Quest already exists for user {} on date {}, returning existing quest", 
+                     user.getEmail(), date);
+            return existingQuest.get();
+        }
 
         int maxAttempts = 3;
         
