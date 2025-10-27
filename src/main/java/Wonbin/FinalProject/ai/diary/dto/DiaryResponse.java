@@ -20,6 +20,7 @@ public class DiaryResponse {
     private LocalDate diaryDate;
     private String mood; // Enum key 값
     private String content;
+    private String summaryText; // 챗봇 대화 요약
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -34,6 +35,7 @@ public class DiaryResponse {
                 .diaryDate(diary.getDiaryDate())
                 .mood(mood.getKey())
                 .content(diary.getContent())
+                .summaryText(diary.getSummaryText())
                 .createdAt(diary.getCreatedAt())
                 .updatedAt(diary.getUpdatedAt())
                 .build();

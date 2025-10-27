@@ -119,4 +119,27 @@ public class DiaryService {
         diaryRepository.delete(diary);
         log.info("일기 삭제 완료 - userId: {}, diaryId: {}", userId, diaryId);
     }
+
+//    /**
+//     * 일기 요약 저장
+//     */
+//    @Transactional
+//    public DiaryResponse saveSummary(Long userId, Long diaryId, String summaryText) {
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+//
+//        Diary diary = diaryRepository.findById(diaryId)
+//                .orElseThrow(() -> new IllegalArgumentException("일기를 찾을 수 없습니다."));
+//
+//        // 본인의 일기인지 확인
+//        if (!diary.getUser().getId().equals(userId)) {
+//            throw new IllegalArgumentException("본인의 일기만 수정할 수 있습니다.");
+//        }
+//
+//        // 요약 텍스트 저장
+//        diary.updateSummary(summaryText);
+//        log.info("일기 요약 저장 완료 - userId: {}, diaryId: {}", userId, diaryId);
+//
+//        return DiaryResponse.from(diary);
+//    }
 }

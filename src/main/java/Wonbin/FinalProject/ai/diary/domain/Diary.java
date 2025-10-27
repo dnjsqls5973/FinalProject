@@ -34,6 +34,10 @@ public class Diary {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
+    // 챗봇 대화 요약
+    @Column(columnDefinition = "TEXT")
+    private String summaryText;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
@@ -56,6 +60,14 @@ public class Diary {
     public void updateDiary(Mood mood, String content) {
         this.mood = mood;
         this.content = content;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 요약 텍스트 업데이트
+     */
+    public void updateSummary(String summaryText) {
+        this.summaryText = summaryText;
         this.updatedAt = LocalDateTime.now();
     }
 }
